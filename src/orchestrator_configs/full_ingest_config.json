@@ -1,0 +1,71 @@
+{
+    "operation": "snapshot",
+    "data_sources": [
+        {
+            "source_type": "epicollect",
+            "url": "https://five.epicollect.net/api/export/entries/salmon-survey-2019?form_ref=397fba6ecc674b74836efc190840c42d_5d6f454667a28&per_page=100",
+            "data_type": "dates",
+            "year": 2019
+        },
+        {
+            "source_type": "epicollect",
+            "url": "https://five.epicollect.net/api/export/entries/salmon-survey-2019?form_ref=397fba6ecc674b74836efc190840c42d_5d6f509867795&per_page=500",
+            "data_type": "survey",
+            "year": 2019
+        },
+        {
+            "source_type": "epicollect",
+            "url": "https://five.epicollect.net/api/export/entries/salmon-survey-2020?form_ref=f550ab6c4dab44f49bcc33b7c1904be9_5d6f454667a28&per_page=100",
+            "data_type": "dates",
+            "year": 2020
+        },
+        {
+            "source_type": "epicollect",
+            "url": "https://five.epicollect.net/api/export/entries/salmon-survey-2020?form_ref=f550ab6c4dab44f49bcc33b7c1904be9_5d6f509867795&per_page=500",
+            "data_type": "survey",
+            "year": 2020
+        },
+        {
+            "source_type": "epicollect",
+            "url": "https://five.epicollect.net/api/export/entries/salmon-survey-2021?form_ref=ad5ffedf0a3246a18934e6ec36ed9569_5d6f454667a28&per_page=100",
+            "data_type": "dates",
+            "year": 2021
+        },
+        {
+            "source_type": "epicollect",
+            "url": "https://five.epicollect.net/api/export/entries/salmon-survey-2021?form_ref=ad5ffedf0a3246a18934e6ec36ed9569_5d6f509867795&per_page=500",
+            "data_type": "survey",
+            "year": 2021
+        },
+        {
+            "source_type": "epicollect",
+            "url": "https://five.epicollect.net/api/export/entries/salmon-survey-2022?form_ref=d46b5d8451f8410ea407bae5c8eb9f49_5d6f454667a28&per_page=100",
+            "data_type": "dates",
+            "year": 2022
+        },
+        {
+            "source_type": "epicollect",
+            "url": "https://five.epicollect.net/api/export/entries/salmon-survey-2022?form_ref=d46b5d8451f8410ea407bae5c8eb9f49_5d6f509867795&per_page=500",
+            "data_type": "survey",
+            "year": 2022
+        },
+        {
+            "source_type": "kobotoolbox",
+            "url": "https://kf.kobotoolbox.org/api/v2/assets/a6dEG7tnrtwjrmituAdL5k/data/?format=json",
+            "data_type": "survey",
+            "year": 2023
+        },
+        {
+            "source_type": "kobotoolbox",
+            "url": "https://kf.kobotoolbox.org/api/v2/assets/ae8BCoHi4EmwnzP2ShmSUw/data/?format=json",
+            "data_type": "survey",
+            "year": 2024
+        },
+        {
+            "source_type": "kobotoolbox",
+            "url": "https://kf.kobotoolbox.org/api/v2/assets/a5WFFCGawCP3aTLHdRjrca/data/?format=json",
+            "data_type": "survey",
+            "year": 2025
+        }
+    ]
+}
