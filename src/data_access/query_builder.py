@@ -1,51 +1,29 @@
-from src.data_access.constructs import SurveyData
+from src.data_access.constructs import SURVEY_DATA_COLUMNS_TO_TYPE, SURVEY_DATA_TABLE_NAME
 
-
-CREATE_TABLE_QUERY = '''
-    CREATE TABLE IF NOT EXISTS survey_data (
-        _id STRING PRIMARY KEY,
-        survey_date DATE,
-        year DATE,
-        quantity INTEGER,
-        distance INTEGER,
-        stream TEXT,
-        type TEXT,
-        species TEXT,
-        predation TEXT,
-        length FLOAT,
-        width FLOAT,
-        spawned TEXT,
-        sex TEXT,
-        latitude FLOAT,
-        longitude FLOAT,
-        accuracy FLOAT
-    );
+DROP_TABLE_QUERY = f'''
+    DROP TABLE IF EXISTS {SURVEY_DATA_TABLE_NAME};
 '''
 
-DROP_TABLE_QUERY = '''
-    DROP TABLE IF EXISTS survey_data;
-'''
+def create_table_query():
+    return f'''
+        CREATE TABLE IF NOT EXISTS {SURVEY_DATA_TABLE_NAME} (
+            {', '.join([f"{c} {t}" for c, t in SURVEY_DATA_COLUMNS_TO_TYPE.items()])}
+        );
+    '''
 
-INSERT_SURVEY_DATA_QUERY = '''
-    INSERT OR IGNORE INTO survey_data (
-    _id,
-    Survey_Date,
-    year,
-    Quantity,
-    Distance,
-    Stream,
-    Type,
-    Species,
-    Predation,
-    Length,
-    Width,
-    Spawned,
-    Sex,
-    Latitude,
-    Longitude,
-    Accuracy
-    ) VALUES (?, ?, ?, COALESCE(?,1), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-'''
+def insert_row_query():
+    return f'''
+        INSERT OR IGNORE INTO {SURVEY_DATA_TABLE_NAME} (
+            {', '.join(SURVEY_DATA_COLUMNS_TO_TYPE.keys())}
+        ) VALUES (?, ?, ?, ?, ?, ?, COALESCE(?,1), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    '''
 
-def convert_data_for_insert(data: SurveyData):
-    pass
+def upsert_row_query():
+    return f'''
+        INSERT INTO {SURVEY_DATA_TABLE_NAME} (
+            {', '.join(SURVEY_DATA_COLUMNS_TO_TYPE.keys())}
+        ) VALUES (?, ?, ?, ?, ?, ?, COALESCE(?,1), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+            {', '.join([f"{c} = excluded.{c}" for c in SURVEY_DATA_COLUMNS_TO_TYPE.keys()])}
+        ;
+    '''
