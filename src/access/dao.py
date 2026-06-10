@@ -15,7 +15,7 @@ class SurveyDataDao:
     def upsert(self, data: SurveyData):
         self.conn.execute(upsert_row_query(), data.to_db_values())
 
-    def query(self, query: str):
+    def query(self, query: str) -> list:
         return self.conn.execute(query).fetchall()
 
     def create_table(self):

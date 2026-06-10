@@ -111,12 +111,10 @@ class SurveyDataValidator:
     
     def _get_count_by_value(self, column, value, year):
         query = value_count_query(column, f"'{value}'", year)
-        print(f"running query {query}")
         return self._get_count(query)
     
     def _get_count_by_presence(self, column, year):
         query = presence_count_query(column, year)
-        print(f"running query {query}")
         return self._get_count(query)
     
     def _get_count_with_location(self, year):

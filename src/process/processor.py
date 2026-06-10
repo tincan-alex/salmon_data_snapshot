@@ -1,11 +1,12 @@
 import json
 from datetime import datetime
 from pathlib import Path
+from pprint import pprint
 from typing import Any, List
 
 from src.access.constructs import SurveyData, SurveyDataColumn
 from src.access.dao import SurveyDataDao
-from src.process.constructs import CARCASS_AGE_RANGE_MAP, SURVEY_DATA_POTENTIAL_KEYS_MAP, SURVEY_DATA_POTENTIAL_VALUES_MAP
+from src.process.constructs import CARCASS_AGE_RANGE_MAP, SURVEY_DATA_POTENTIAL_KEYS_MAP, SURVEY_DATA_POTENTIAL_VALUES_MAP, DataForYear
 
 class SurveyDataProcessor:
     def __init__(self, survey_data_dao: SurveyDataDao):
@@ -23,6 +24,35 @@ class SurveyDataProcessor:
         
         self.process_survey_dates(dates_files)
         self.process_survey_data(data_files)
+
+
+    def process_by_year(self, years, snapshot_root_path):
+        years_to_files = {}
+        remaining = set(years)
+        snapshots_root = Path(snapshot_root_path)
+        snapshot_dirs = sorted([p for p in snapshots_root.iterdir() if p.is_dir()], key=lambda p: p.name, reverse=True)
+        print(f"Searching snapshots under {snapshots_root}...")
+        for snapshot in snapshot_dirs:
+            if not remaining:
+                break
+            print(f"  Searching {snapshot}...")
+            dates_files = sorted(snapshot.glob("*dates*.json"))
+            data_files = sorted(snapshot.glob("*survey*.json"))
+            for year in list(remaining):
+                prefix = f"{year}_"
+                dates = [p for p in dates_files if p.name.startswith(prefix)]
+                data = [p for p in data_files if p.name.startswith(prefix)]
+                if dates or data:
+                    years_to_files[year] = DataForYear(year=year, snapshot=snapshot.name, data_files=data, dates_files=dates)
+                    remaining.remove(year)
+                    print(f"  Assigning paths to {year}:")
+                    pprint(dates, indent=2)
+                    pprint(data, indent=2)
+        dates_files = [file for d in years_to_files.values() for file in d.dates_files]
+        data_files = [file for d in years_to_files.values() for file in d.data_files]
+        self.process_survey_dates(dates_files)
+        self.process_survey_data(data_files)
+
 
     def process_survey_data(self, file_list: list):
         for file in file_list:

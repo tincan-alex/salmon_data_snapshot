@@ -6,12 +6,12 @@ from src.constructs import DataSource, DataSourceType
 from src.process.constructs import DEFAULT_DELAYS, EPICOLLECT_DELAYS
 
 
-class SurveyDataIngester:
+class SurveyDataPuller:
     def __init__(self, data_sources: list[DataSource], destination_path: str):
         self.data_sources = data_sources
         self.path = destination_path
-    
-    def ingest(self):
+
+    def pull_data(self):
         for source in self.data_sources:
             self._process_source(source)
 

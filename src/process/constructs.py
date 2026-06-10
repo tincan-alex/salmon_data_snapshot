@@ -1,4 +1,6 @@
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from pathlib import Path
 
 from src.access.constructs import CarcassAge, SurveyDataColumn, SurveyType, StreamLabel, Species, Sex, LifeStage, AdiposeFinStatus, SpawnStatus, PredationStatus
 
@@ -31,10 +33,10 @@ SURVEY_DATA_POTENTIAL_VALUES_MAP = {
     },
     SurveyDataColumn.LIFE_STAGE: {
         LifeStage.ADULT: {"adult", "a", "ad"},
-        LifeStage.JUNIOR: {"junior", "j", "ju"},
-        LifeStage.FIRST_YEAR: {"1st year", "1", "1yr"},
-        LifeStage.SECOND_YEAR: {"2nd year", "2", "2 yr"},
-        LifeStage.THIRD_YEAR: {"3rd year", "3", "3 yr"},
+        LifeStage.JUVENILE: {"juvenile", "j", "ju"},
+        LifeStage.FIRST_YEAR: {"1st year", "1", "1yr", "first year"},
+        LifeStage.SECOND_YEAR: {"2nd year", "2", "2 yr", "second year"},
+        LifeStage.THIRD_YEAR: {"3rd year", "3", "3 yr", "third year"},
         LifeStage.UNKNOWN: {"unknown", "u", "unk", "uk"},
     },
     SurveyDataColumn.CARCASS_AGE_LABEL: {
@@ -88,12 +90,9 @@ CARCASS_AGE_RANGE_MAP = {
     CarcassAge.GREATER_THAN_24_HOURS: (24, None),
 }
 
-def get_latest_survey_year() -> int:
-    now = datetime.now(timezone.utc)
-    if now.month >= 10:
-        return now.year
-    else:
-        return now.year - 1
-
-def get_all_survey_years(start_year=2019) -> list[int]:
-    return list[range(start_year, get_latest_survey_year()+1)]
+@dataclass
+class DataForYear:
+    year: int
+    snapshot: str
+    dates_files: list[Path]=field(default_factory=list) 
+    data_files: list[Path]=field(default_factory=list) 
