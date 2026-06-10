@@ -5,9 +5,10 @@ from pathlib import Path
 import sqlite3
 
 from src.constructs import DataOperation, DataOrchestratorConfig, DataSource
-from src.data_access.dao import SurveyDataDao
-from src.data_process.ingester import SurveyDataIngester
-from src.data_process.processor import SurveyDataProcessor
+from src.access.dao import SurveyDataDao
+from src.process.ingester import SurveyDataIngester
+from src.process.processor import SurveyDataProcessor
+from src.validation.validator import SurveyDataValidator
 
 class DataOrchestrator:
     def __init__(self):
@@ -51,8 +52,8 @@ class DataOrchestrator:
     def validate_data(self):
         with sqlite3.connect(self.db_path) as conn:
             survey_dao = SurveyDataDao(conn)
-            survey_dao.query('validation query')
-            # run validations on db
+            validator = SurveyDataValidator(survey_dao)
+            validator.validate_db()
 
     def ingest_data(self):
         if self.config.data_sources:

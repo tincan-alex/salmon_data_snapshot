@@ -1,7 +1,7 @@
-from src.data_access.constructs import SurveyData
+from src.access.constructs import SurveyData
 from sqlite3 import Connection
 
-from src.data_access.query_builder import DROP_TABLE_QUERY, create_table_query, insert_row_query, upsert_row_query
+from src.access.query_builder import DROP_TABLE_QUERY, create_table_query, insert_row_query, upsert_row_query
 
 
 
@@ -16,7 +16,7 @@ class SurveyDataDao:
         self.conn.execute(upsert_row_query(), data.to_db_values())
 
     def query(self, query: str):
-        self.conn.execute(query)
+        return self.conn.execute(query).fetchall()
 
     def create_table(self):
         self.conn.execute(create_table_query())

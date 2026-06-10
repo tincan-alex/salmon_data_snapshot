@@ -1,10 +1,14 @@
-from src.data_access.constructs import SurveyDataColumn, SurveyType, StreamLabel, Species, Sex, LifeStage, AdiposeFinStatus, SpawnStatus, PredationStatus
+from datetime import datetime, timezone
+
+from src.access.constructs import CarcassAge, SurveyDataColumn, SurveyType, StreamLabel, Species, Sex, LifeStage, AdiposeFinStatus, SpawnStatus, PredationStatus
+
+EPICOLLECT_DELAYS = [5, 60, 120, 300]
+DEFAULT_DELAYS = [2, 8, 20]
 
 SURVEY_DATA_POTENTIAL_VALUES_MAP = {
     SurveyDataColumn.SURVEY_TYPE: {
         SurveyType.LIVE: {"live", "l"},
-        SurveyType.DEAD: {"dead", "d"},
-        SurveyType.REMNANT: {"remnant", "r"},
+        SurveyType.DEAD: {"dead", "d", "remnant", "r"},
         SurveyType.REDD: {"redd", "red"},
     },
     SurveyDataColumn.STREAM: {
@@ -33,6 +37,12 @@ SURVEY_DATA_POTENTIAL_VALUES_MAP = {
         LifeStage.THIRD_YEAR: {"3rd year", "3", "3 yr"},
         LifeStage.UNKNOWN: {"unknown", "u", "unk", "uk"},
     },
+    SurveyDataColumn.CARCASS_AGE_LABEL: {
+        CarcassAge.LESS_THAN_1_HOUR: {"less than 1 hour"},
+        CarcassAge.LESS_THAN_12_HOURS: {"1-12 hours"},
+        CarcassAge.LESS_THAN_24_HOURS: {"12-24 hours"},
+        CarcassAge.GREATER_THAN_24_HOURS: {"greater than 24 hours"},
+    },
     SurveyDataColumn.ADIPOSE_FIN: {
         AdiposeFinStatus.YES: {"yes", "y"},
         AdiposeFinStatus.NO: {"no", "n"},
@@ -47,7 +57,7 @@ SURVEY_DATA_POTENTIAL_VALUES_MAP = {
     SurveyDataColumn.PREDATION: {
         PredationStatus.PREDATION: {"predation", "yes", "y"},
         PredationStatus.NO_DAMAGE: {"no damage", "no", "n"},
-        PredationStatus.EYE_LOSS_ONLY: {"eye loss only"},
+        PredationStatus.EYE_LOSS_ONLY: {"eye loss only", "eye loss"},
         PredationStatus.UNKNOWN: {"unknown", "u", "unk", "uk"},
     },
 }
@@ -70,3 +80,20 @@ SURVEY_DATA_POTENTIAL_KEYS_MAP = {
     SurveyDataColumn.PREDATION: {"Predation"},
     SurveyDataColumn.NOTE: {"Notes"},
 }
+
+CARCASS_AGE_RANGE_MAP = {
+    CarcassAge.LESS_THAN_1_HOUR: (0, 1),
+    CarcassAge.LESS_THAN_12_HOURS: (1, 12),
+    CarcassAge.LESS_THAN_24_HOURS: (12, 24),
+    CarcassAge.GREATER_THAN_24_HOURS: (24, None),
+}
+
+def get_latest_survey_year() -> int:
+    now = datetime.now(timezone.utc)
+    if now.month >= 10:
+        return now.year
+    else:
+        return now.year - 1
+
+def get_all_survey_years(start_year=2019) -> list[int]:
+    return list[range(start_year, get_latest_survey_year()+1)]

@@ -3,11 +3,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, List
 
-from src.data_access.constructs import SurveyData, SurveyDataColumn
-from src.data_access.dao import SurveyDataDao
-from src.data_process.constructs import SURVEY_DATA_POTENTIAL_KEYS_MAP, SURVEY_DATA_POTENTIAL_VALUES_MAP
+from src.access.constructs import SurveyData, SurveyDataColumn
+from src.access.dao import SurveyDataDao
+from src.process.constructs import CARCASS_AGE_RANGE_MAP, SURVEY_DATA_POTENTIAL_KEYS_MAP, SURVEY_DATA_POTENTIAL_VALUES_MAP
 
-# special processing: quantity, carcass age, location
 class SurveyDataProcessor:
     def __init__(self, survey_data_dao: SurveyDataDao):
         self.survey_data_entry_processor = SurveyDataEntryProcessor()
@@ -73,8 +72,6 @@ class SurveyDataEntryProcessor:
                 data[SurveyDataColumn.ID.value] = str(value)
             elif normalized_key is SurveyDataColumn.SURVEY_DATE:
                 data[SurveyDataColumn.SURVEY_DATE.value] = self._parse_date(value)
-            elif normalized_key in self.data_normalization_map:
-                data[normalized_key.value] = self._normalize_value(normalized_key, value)
             elif normalized_key is SurveyDataColumn.DISTANCE:
                 data[SurveyDataColumn.DISTANCE.value] = self._parse_int(value)
             elif normalized_key is SurveyDataColumn.QUANTITY:
@@ -84,22 +81,27 @@ class SurveyDataEntryProcessor:
             elif normalized_key is SurveyDataColumn.WIDTH:
                 data[SurveyDataColumn.WIDTH.value] = self._parse_float(value)
             elif normalized_key is SurveyDataColumn.CARCASS_AGE_LABEL:
-                if self._is_int(value):
-                    hours = int(float(str(value).strip()))
-                    data[SurveyDataColumn.CARCASS_AGE_MIN.value] = hours
-                    data[SurveyDataColumn.CARCASS_AGE_MAX.value] = hours
-                data[SurveyDataColumn.CARCASS_AGE_LABEL.value] = value
+                label, min_age, max_age = self._parse_carcass_age(value)
+                data[SurveyDataColumn.CARCASS_AGE_LABEL.value] = label
+                data[SurveyDataColumn.CARCASS_AGE_MIN.value] = min_age
+                data[SurveyDataColumn.CARCASS_AGE_MAX.value] = max_age
             elif normalized_key is SurveyDataColumn.NOTE:
                 data[SurveyDataColumn.NOTE.value] = value
             elif key in {"Location", "location"}:
                 data.update(self._parse_location(value))
+            elif normalized_key in self.data_normalization_map:
+                data[normalized_key.value] = self._normalize_value(normalized_key, value)
 
+        # default quantity to 1
         if SurveyDataColumn.QUANTITY.value not in data:
             data[SurveyDataColumn.QUANTITY.value] = 1
+        # fetch survey date from map for epicollect data
         if SurveyDataColumn.SURVEY_DATE.value not in data:
             date_key = blob.get("ec5_parent_uuid")
             date = self.survey_dates_map.get(date_key)
-            data[SurveyDataColumn.SURVEY_DATE.value] = date
+            data[SurveyDataColumn.SURVEY_DATE.value] = self._parse_date(date)
+        if data.get(SurveyDataColumn.SURVEY_DATE.value):
+            data[SurveyDataColumn.YEAR] = data.get(SurveyDataColumn.SURVEY_DATE.value).year
 
         return SurveyData(**data)
 
@@ -153,7 +155,7 @@ class SurveyDataEntryProcessor:
         return text or None
 
     def _normalize_value(self, normalized_key, value):
-        if value is None:
+        if not value:
             return None
         lookup = self.data_normalization_map.get(normalized_key, {})
         normalized_value = lookup.get(str(value).strip().lower())
@@ -163,6 +165,15 @@ class SurveyDataEntryProcessor:
         if not isinstance(key, str):
             return key
         return key.strip().lower().replace(" ", "_").replace("-", "_")
+
+    def _parse_carcass_age(self, value):
+        if self._is_int(value):
+            hours = int(float(str(value).strip()))
+            return value, hours, hours
+        else:
+            normalized_label = self._normalize_value(SurveyDataColumn.CARCASS_AGE_LABEL, value)
+            min_age, max_age = CARCASS_AGE_RANGE_MAP.get(normalized_label, (None, None))
+            return normalized_label, min_age, max_age
 
     def _parse_location(self, location_blob):
         if isinstance(location_blob, str):

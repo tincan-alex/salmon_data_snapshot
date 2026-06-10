@@ -8,6 +8,7 @@ SURVEY_DATA_TABLE_NAME = 'survey_data'
 class SurveyDataColumn(StrEnum):
     ID = "id"
     SURVEY_DATE = "survey_date"
+    YEAR = "year"
     SURVEY_TYPE = "survey_type"
     DISTANCE = "distance"
     STREAM = "stream"
@@ -32,6 +33,7 @@ class SurveyDataColumn(StrEnum):
 SURVEY_DATA_COLUMNS_TO_TYPE: OrderedDict[str, str] = {
     SurveyDataColumn.ID: "STRING PRIMARY KEY",
     SurveyDataColumn.SURVEY_DATE: "DATE",
+    SurveyDataColumn.YEAR: "INTEGER",
     SurveyDataColumn.SURVEY_TYPE: "TEXT",
     SurveyDataColumn.DISTANCE: "INTEGER",
     SurveyDataColumn.STREAM: "TEXT",
@@ -60,7 +62,6 @@ class StreamLabel(StrEnum):
 class SurveyType(StrEnum):
     LIVE = "Live"
     DEAD = "Dead"
-    REMNANT = "Remnant"
     REDD = "Redd"
 
 class Species(StrEnum):
@@ -76,6 +77,12 @@ class Sex(StrEnum):
     MALE = "Male"
     FEMALE = "Female"
     UNKNOWN = "Unknown"
+
+class CarcassAge(StrEnum):
+    LESS_THAN_1_HOUR = "Less than 1 hour"
+    LESS_THAN_12_HOURS = "1-12 hours"
+    LESS_THAN_24_HOURS = "12-24 hours"
+    GREATER_THAN_24_HOURS = "Greater than 24 hours"
 
 class AdiposeFinStatus(StrEnum):
     YES = "Yes"
@@ -107,6 +114,7 @@ class SurveyData:
     id: str
     survey_date: Optional[datetime] = None
     survey_type: Optional[SurveyType] = None
+    year: Optional[int] = None
     distance: Optional[int] = None
     stream: Optional[StreamLabel] = None
     species: Optional[str] = None

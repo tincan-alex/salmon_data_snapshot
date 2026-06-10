@@ -3,6 +3,7 @@ import time
 import requests
 
 from src.constructs import DataSource, DataSourceType
+from src.process.constructs import DEFAULT_DELAYS, EPICOLLECT_DELAYS
 
 
 class SurveyDataIngester:
@@ -32,7 +33,11 @@ class SurveyDataIngester:
                 json.dump(entries, file, indent=4, ensure_ascii=False)
             page += 1
 
-    def _fetch_page(self, url: str, label: str, is_epicollect: bool, delays=[5, 60, 120, 300]):
+    def _fetch_page(self, url: str, label: str, is_epicollect: bool):
+        if is_epicollect:
+            delays = EPICOLLECT_DELAYS
+        else:
+            delays = DEFAULT_DELAYS
         for attempt, delay in enumerate(delays, start=1):
             time.sleep(delay)
 
