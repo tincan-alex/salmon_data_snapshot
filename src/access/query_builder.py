@@ -16,16 +16,16 @@ def insert_row_query():
     return f'''
         INSERT OR IGNORE INTO {SURVEY_DATA_TABLE_NAME} (
             {', '.join(SURVEY_DATA_COLUMNS_TO_TYPE.keys())}
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, COALESCE(?,1), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?,1), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     '''
 
 def upsert_row_query():
     return f'''
         INSERT INTO {SURVEY_DATA_TABLE_NAME} (
             {', '.join(SURVEY_DATA_COLUMNS_TO_TYPE.keys())}
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, COALESCE(?,1), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(id) DO UPDATE SET
-            {', '.join([f"{c} = excluded.{c}" for c in SURVEY_DATA_COLUMNS_TO_TYPE.keys()])}
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?,1), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(external_id) DO UPDATE SET
+            {', '.join([f"{c} = excluded.{c}" for c in SURVEY_DATA_COLUMNS_TO_TYPE.keys() if c != SurveyDataColumn.EXTERNAL_ID])}
         ;
     '''
 

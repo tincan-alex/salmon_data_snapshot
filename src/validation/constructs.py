@@ -24,9 +24,9 @@ SURVEY_DATA_PRESENCE_ASSERTIONS = [
 ]
 
 SURVEY_DATA_DISTINCT_VALUE_ASSERTIONS = {
-    SurveyDataAssertion.ADIPOSE_FIN_STATUSES: [status.value for status in AdiposeFinStatus],
-    SurveyDataAssertion.PREDATION_STATUSES: [status.value for status in PredationStatus],
-    SurveyDataAssertion.SPAWN_STATUSES: [status.value for status in SpawnStatus],
+    SurveyDataAssertion.ADIPOSE_FIN_STATUSES: [status.value for status in AdiposeFinStatus if status != AdiposeFinStatus.UNKNOWN],
+    SurveyDataAssertion.PREDATION_STATUSES: [status.value for status in PredationStatus if status not in [PredationStatus.UNKNOWN, PredationStatus.SCAVENGED]],
+    SurveyDataAssertion.SPAWN_STATUSES: [status.value for status in SpawnStatus if status != SpawnStatus.UNKNOWN],
 }
 
 SURVEY_DATA_EXPECTED_COUNTS_MAP = {

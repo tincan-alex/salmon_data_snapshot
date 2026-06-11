@@ -46,6 +46,15 @@ SAMPLE COMMANDS
 =======================================================================================================================
 
 todo:
+* assign internal id with external id uniqueness index
+* add pebble column
+* support csv ingestion
+* ask about how to handle certain values
+    * is there "unknown" in e.g. sex/predation/adipose fin status or should they all be left blank?
+    * how should "-" be treated? should they be filtered/blanked out?
+    * it looks like there is scavenged status in predation field in scanned data - it doesn't seem to be the case in epicollect/kobotoolbox data; how should eye loss/eye loss only values in predation be treated?
+    * there are some values in predation field that i'm not quite sure what they mean, they are mostly present in 2017 and 2018 data - y/n, y/p, n/y, p/s, s/p, s/y, y/p
+    * should we keep data like carcass age and length/width?
 * unit tests
 * github action for survey season daily ingestion
     * rebase from master

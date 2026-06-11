@@ -7,12 +7,14 @@ SURVEY_DATA_TABLE_NAME = 'survey_data'
 
 class SurveyDataColumn(StrEnum):
     ID = "id"
+    EXTERNAL_ID = "external_id"
     SURVEY_DATE = "survey_date"
     YEAR = "year"
     SURVEY_TYPE = "survey_type"
     DISTANCE = "distance"
     STREAM = "stream"
     SPECIES = "species"
+    GRAVEL = "gravel"
     QUANTITY = "quantity"
     SEX = "sex"
     LIFE_STAGE = "life_stage"
@@ -31,12 +33,14 @@ class SurveyDataColumn(StrEnum):
 
 
 SURVEY_DATA_COLUMNS_TO_TYPE: OrderedDict[str, str] = {
-    SurveyDataColumn.ID: "STRING PRIMARY KEY",
+    SurveyDataColumn.ID: "INTEGER PRIMARY KEY",
+    SurveyDataColumn.EXTERNAL_ID: "TEXT UNIQUE",
     SurveyDataColumn.SURVEY_DATE: "DATE",
     SurveyDataColumn.YEAR: "INTEGER",
     SurveyDataColumn.SURVEY_TYPE: "TEXT",
     SurveyDataColumn.DISTANCE: "INTEGER",
     SurveyDataColumn.STREAM: "TEXT",
+    SurveyDataColumn.GRAVEL: "TEXT",
     SurveyDataColumn.SPECIES: "TEXT",
     SurveyDataColumn.QUANTITY: "INTEGER",
     SurveyDataColumn.SEX: "TEXT",
@@ -93,6 +97,7 @@ class PredationStatus(StrEnum):
     PREDATION = "Predation"
     NO_DAMAGE = "No damage"
     EYE_LOSS_ONLY = "Eye loss only"
+    SCAVENGED = "Scavenged"
     UNKNOWN = "Unknown"
 
 class SpawnStatus(StrEnum):
@@ -111,7 +116,8 @@ class LifeStage(StrEnum):
 
 @dataclass
 class SurveyData:
-    id: str
+    external_id: str
+    id: Optional[int] = None
     survey_date: Optional[datetime] = None
     survey_type: Optional[SurveyType] = None
     year: Optional[int] = None
@@ -119,6 +125,7 @@ class SurveyData:
     stream: Optional[StreamLabel] = None
     species: Optional[str] = None
     quantity: Optional[int] = None
+    gravel: Optional[str] = None
     sex: Optional[Sex] = None
     life_stage: Optional[str] = None
     adipose_fin: Optional[AdiposeFinStatus] = None
@@ -137,10 +144,7 @@ class SurveyData:
     def to_db_values(self):
         values = []
         for c in SURVEY_DATA_COLUMNS_TO_TYPE.keys():
-            if c == '_id':
-                values.append(self.id)
-            else:
-                values.append(getattr(self, c))
+            values.append(getattr(self, c))
         return tuple(values)
 
 

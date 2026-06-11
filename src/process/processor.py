@@ -1,3 +1,4 @@
+import csv
 import json
 from datetime import datetime
 from pathlib import Path
@@ -20,7 +21,10 @@ class SurveyDataProcessor:
             raise ValueError(f"process_path expects a directory path, got {path}")
 
         dates_files = sorted(path.glob('*dates*.json'))
-        data_files = sorted(path.glob("*survey*.json"))
+        data_files = sorted(
+            list(path.glob("*survey*.json")) +
+            list(path.glob("*salmon*.csv"))
+        )
         
         self.process_survey_dates(dates_files)
         self.process_survey_data(data_files)
@@ -37,7 +41,10 @@ class SurveyDataProcessor:
                 break
             print(f"  Searching {snapshot}...")
             dates_files = sorted(snapshot.glob("*dates*.json"))
-            data_files = sorted(snapshot.glob("*survey*.json"))
+            data_files = sorted(
+                list(snapshot.glob("*survey*.json")) +
+                list(snapshot.glob("*salmon*.csv"))
+            )
             for year in list(remaining):
                 prefix = f"{year}_"
                 dates = [p for p in dates_files if p.name.startswith(prefix)]
@@ -58,9 +65,17 @@ class SurveyDataProcessor:
         for file in file_list:
             try:
                 print(f"Processing {file}...")
-                json_path = Path(file)
-                payload = json.loads(json_path.read_text(encoding="utf-8"))
-                survey_data: List[SurveyData] = [self.survey_data_entry_processor.process_entry_blob(blob) for blob in payload]
+                file_path = Path(file)
+                survey_data: List[SurveyData] = []
+                if file_path.suffix == ".json":
+                    payload = json.loads(file_path.read_text(encoding="utf-8"))
+                    survey_data = [self.survey_data_entry_processor.process_entry_blob(blob) for blob in payload]
+                elif file_path.suffix == ".csv":
+                    with open(file_path, mode='r', newline='', encoding='utf-8') as csv_file:
+                        reader = csv.DictReader(csv_file)
+                        survey_data = [self.survey_data_entry_processor.process_entry_blob(row) for row in reader]
+                else:
+                    raise RuntimeError(f"Unsupported data file type at {file_path}")
                 print(f"    generated {len(survey_data)} entries")
                 for entry in survey_data:
                     self.dao.upsert(entry)
@@ -98,8 +113,9 @@ class SurveyDataEntryProcessor:
             if normalized_key is None:
                 normalized_key = self.key_normalization_map.get(self._normalize_key_name(key))
 
-            if normalized_key is SurveyDataColumn.ID:
-                data[SurveyDataColumn.ID.value] = str(value)
+            if normalized_key is SurveyDataColumn.EXTERNAL_ID:
+                if not data.get(SurveyDataColumn.EXTERNAL_ID.value):
+                    data[SurveyDataColumn.EXTERNAL_ID.value] = str(value)
             elif normalized_key is SurveyDataColumn.SURVEY_DATE:
                 data[SurveyDataColumn.SURVEY_DATE.value] = self._parse_date(value)
             elif normalized_key is SurveyDataColumn.DISTANCE:
@@ -115,11 +131,9 @@ class SurveyDataEntryProcessor:
                 data[SurveyDataColumn.CARCASS_AGE_LABEL.value] = label
                 data[SurveyDataColumn.CARCASS_AGE_MIN.value] = min_age
                 data[SurveyDataColumn.CARCASS_AGE_MAX.value] = max_age
-            elif normalized_key is SurveyDataColumn.NOTE:
-                data[SurveyDataColumn.NOTE.value] = value
             elif key in {"Location", "location"}:
                 data.update(self._parse_location(value))
-            elif normalized_key in self.data_normalization_map:
+            elif normalized_key:
                 data[normalized_key.value] = self._normalize_value(normalized_key, value)
 
         # default quantity to 1
@@ -194,7 +208,7 @@ class SurveyDataEntryProcessor:
     def _normalize_key_name(self, key):
         if not isinstance(key, str):
             return key
-        return key.strip().lower().replace(" ", "_").replace("-", "_")
+        return key.strip().lower().replace(" ", "_")
 
     def _parse_carcass_age(self, value):
         if self._is_int(value):

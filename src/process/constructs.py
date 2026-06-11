@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from pathlib import Path
 
 from src.access.constructs import CarcassAge, SurveyDataColumn, SurveyType, StreamLabel, Species, Sex, LifeStage, AdiposeFinStatus, SpawnStatus, PredationStatus
@@ -60,27 +59,29 @@ SURVEY_DATA_POTENTIAL_VALUES_MAP = {
         PredationStatus.PREDATION: {"predation", "yes", "y"},
         PredationStatus.NO_DAMAGE: {"no damage", "no", "n"},
         PredationStatus.EYE_LOSS_ONLY: {"eye loss only", "eye loss"},
+        PredationStatus.SCAVENGED: {"scavenged", "s", "sc"},
         PredationStatus.UNKNOWN: {"unknown", "u", "unk", "uk"},
     },
 }
 
 SURVEY_DATA_POTENTIAL_KEYS_MAP = {
-    SurveyDataColumn.ID: {"_id", "ec5_uuid"},
-    SurveyDataColumn.SURVEY_DATE: {"Survey_Date"},
-    SurveyDataColumn.SURVEY_TYPE: {"Type"},
-    SurveyDataColumn.DISTANCE: {"Distance"},
-    SurveyDataColumn.STREAM: {"Stream"},
-    SurveyDataColumn.SPECIES: {"Species"},
-    SurveyDataColumn.QUANTITY: {"Quantity"},
-    SurveyDataColumn.SEX: {"Sex"},
-    SurveyDataColumn.LIFE_STAGE: {"Life_Stage"},
-    SurveyDataColumn.ADIPOSE_FIN: {"Adipose_Fin"},
-    SurveyDataColumn.LENGTH: {"Length_Inches", "Length"},
-    SurveyDataColumn.WIDTH: {"Width_Inches", "Width"},
-    SurveyDataColumn.CARCASS_AGE_LABEL: {"Carcass_Age", "Hours_Since_Death"},
-    SurveyDataColumn.SPAWNED: {"Spawning_Success", "Spawned"},
-    SurveyDataColumn.PREDATION: {"Predation"},
-    SurveyDataColumn.NOTE: {"Notes"},
+    SurveyDataColumn.EXTERNAL_ID: {"_id", "ec5_uuid", "id"},
+    SurveyDataColumn.SURVEY_DATE: {"survey_date"},
+    SurveyDataColumn.SURVEY_TYPE: {"type"},
+    SurveyDataColumn.DISTANCE: {"distance"},
+    SurveyDataColumn.STREAM: {"stream"},
+    SurveyDataColumn.SPECIES: {"species"},
+    SurveyDataColumn.GRAVEL: {"gravel"},
+    SurveyDataColumn.QUANTITY: {"quantity"},
+    SurveyDataColumn.SEX: {"sex"},
+    SurveyDataColumn.LIFE_STAGE: {"life_stage"},
+    SurveyDataColumn.ADIPOSE_FIN: {"adipose_fin"},
+    SurveyDataColumn.LENGTH: {"length_inches", "length"},
+    SurveyDataColumn.WIDTH: {"width_inches", "width"},
+    SurveyDataColumn.CARCASS_AGE_LABEL: {"carcass_age", "hours_since_death"},
+    SurveyDataColumn.SPAWNED: {"spawning_success", "spawned"},
+    SurveyDataColumn.PREDATION: {"predation"},
+    SurveyDataColumn.NOTE: {"notes"},
 }
 
 CARCASS_AGE_RANGE_MAP = {
@@ -94,5 +95,5 @@ CARCASS_AGE_RANGE_MAP = {
 class DataForYear:
     year: int
     snapshot: str
-    dates_files: list[Path]=field(default_factory=list) 
-    data_files: list[Path]=field(default_factory=list) 
+    dates_files: list[Path]=field(default_factory=list)
+    data_files: list[Path]=field(default_factory=list)
