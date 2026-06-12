@@ -1,8 +1,12 @@
 from src.access.constructs import SurveyData
 from sqlite3 import Connection
 
-from src.access.query_builder import DROP_TABLE_QUERY, create_table_query, insert_row_query, upsert_row_query
-
+from src.access.query_builder import (
+    DROP_TABLE_QUERY,
+    create_table_query,
+    insert_row_query,
+    upsert_row_query,
+)
 
 
 class SurveyDataDao:
@@ -11,7 +15,7 @@ class SurveyDataDao:
 
     def insert(self, data: SurveyData):
         self.conn.execute(insert_row_query(), data.to_db_values())
-    
+
     def upsert(self, data: SurveyData):
         self.conn.execute(upsert_row_query(), data.to_db_values())
 
@@ -20,11 +24,9 @@ class SurveyDataDao:
 
     def create_table(self):
         self.conn.execute(create_table_query())
-        self.conn.commit()
 
     def create_indices(self):
         pass
 
     def clean(self):
         self.conn.execute(DROP_TABLE_QUERY)
-        self.conn.commit()

@@ -1,7 +1,18 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from src.access.constructs import CarcassAge, SurveyDataColumn, SurveyType, StreamLabel, Species, Sex, LifeStage, AdiposeFinStatus, SpawnStatus, PredationStatus
+from src.access.constructs import (
+    CarcassAge,
+    SurveyDataColumn,
+    SurveyType,
+    StreamLabel,
+    Species,
+    Sex,
+    LifeStage,
+    AdiposeFinStatus,
+    SpawnStatus,
+    PredationStatus,
+)
 
 EPICOLLECT_DELAYS = [5, 60, 120, 300]
 DEFAULT_DELAYS = [2, 8, 20]
@@ -91,9 +102,10 @@ CARCASS_AGE_RANGE_MAP = {
     CarcassAge.GREATER_THAN_24_HOURS: (24, None),
 }
 
+
 @dataclass
 class DataForYear:
-    year: int
+    year: str
     snapshot: str
-    dates_files: list[Path]=field(default_factory=list)
-    data_files: list[Path]=field(default_factory=list)
+    dates_files: list[Path] = field(default_factory=list)
+    data_files: list[Path] = field(default_factory=list)

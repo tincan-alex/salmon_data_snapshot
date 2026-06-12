@@ -7,7 +7,13 @@ from typing import Any, List
 
 from src.access.constructs import SurveyData, SurveyDataColumn
 from src.access.dao import SurveyDataDao
-from src.process.constructs import CARCASS_AGE_RANGE_MAP, SURVEY_DATA_POTENTIAL_KEYS_MAP, SURVEY_DATA_POTENTIAL_VALUES_MAP, DataForYear
+from src.process.constructs import (
+    CARCASS_AGE_RANGE_MAP,
+    SURVEY_DATA_POTENTIAL_KEYS_MAP,
+    SURVEY_DATA_POTENTIAL_VALUES_MAP,
+    DataForYear,
+)
+
 
 class SurveyDataProcessor:
     def __init__(self, survey_data_dao: SurveyDataDao):
@@ -20,46 +26,53 @@ class SurveyDataProcessor:
         if not path.is_dir():
             raise ValueError(f"process_path expects a directory path, got {path}")
 
-        dates_files = sorted(path.glob('*dates*.json'))
+        dates_files = sorted(path.glob("*dates*.json"))
         data_files = sorted(
-            list(path.glob("*survey*.json")) +
-            list(path.glob("*salmon*.csv"))
+            list(path.glob("*survey*.json")) + list(path.glob("*salmon*.csv"))
         )
-        
+
         self.process_survey_dates(dates_files)
         self.process_survey_data(data_files)
 
-
-    def process_by_year(self, years, snapshot_root_path):
+    def process_all_data(self, snapshot_root_path, years=[]):
         years_to_files = {}
-        remaining = set(years)
+        remaining = set([str(y) for y in years])
+        process_all = not years
         snapshots_root = Path(snapshot_root_path)
-        snapshot_dirs = sorted([p for p in snapshots_root.iterdir() if p.is_dir()], key=lambda p: p.name, reverse=True)
-        print(f"Searching snapshots under {snapshots_root}...")
+        snapshot_dirs = sorted(
+            [p for p in snapshots_root.iterdir() if p.is_dir()],
+            key=lambda p: p.name,
+            reverse=True,
+        )
+        print(f"Searching snapshots under {snapshots_root} for years {years}...")
         for snapshot in snapshot_dirs:
-            if not remaining:
+            if not process_all and not remaining:
                 break
             print(f"  Searching {snapshot}...")
-            dates_files = sorted(snapshot.glob("*dates*.json"))
-            data_files = sorted(
-                list(snapshot.glob("*survey*.json")) +
-                list(snapshot.glob("*salmon*.csv"))
-            )
-            for year in list(remaining):
-                prefix = f"{year}_"
-                dates = [p for p in dates_files if p.name.startswith(prefix)]
-                data = [p for p in data_files if p.name.startswith(prefix)]
-                if dates or data:
-                    years_to_files[year] = DataForYear(year=year, snapshot=snapshot.name, data_files=data, dates_files=dates)
-                    remaining.remove(year)
-                    print(f"  Assigning paths to {year}:")
-                    pprint(dates, indent=2)
-                    pprint(data, indent=2)
+
+            snapshot_map = {}
+            for file in list(snapshot.glob("*.json")) + list(snapshot.glob("*.csv")):
+                prefix = file.name.split("_")[0]
+                if (
+                    prefix in remaining or process_all
+                ) and prefix not in years_to_files.keys():
+                    if prefix not in snapshot_map:
+                        snapshot_map[prefix] = DataForYear(
+                            year=prefix, snapshot=snapshot.name
+                        )
+                    if "dates" in file.name:
+                        snapshot_map[prefix].dates_files.append(file)
+                    else:
+                        snapshot_map[prefix].data_files.append(file)
+            print("  Assigning paths:")
+            pprint(snapshot_map, indent=2)
+            years_to_files |= snapshot_map
+            remaining -= set(snapshot_map.keys())
+
         dates_files = [file for d in years_to_files.values() for file in d.dates_files]
         data_files = [file for d in years_to_files.values() for file in d.data_files]
         self.process_survey_dates(dates_files)
         self.process_survey_data(data_files)
-
 
     def process_survey_data(self, file_list: list):
         for file in file_list:
@@ -69,11 +82,19 @@ class SurveyDataProcessor:
                 survey_data: List[SurveyData] = []
                 if file_path.suffix == ".json":
                     payload = json.loads(file_path.read_text(encoding="utf-8"))
-                    survey_data = [self.survey_data_entry_processor.process_entry_blob(blob) for blob in payload]
+                    survey_data = [
+                        self.survey_data_entry_processor.process_entry_blob(blob)
+                        for blob in payload
+                    ]
                 elif file_path.suffix == ".csv":
-                    with open(file_path, mode='r', newline='', encoding='utf-8') as csv_file:
+                    with open(
+                        file_path, mode="r", newline="", encoding="utf-8"
+                    ) as csv_file:
                         reader = csv.DictReader(csv_file)
-                        survey_data = [self.survey_data_entry_processor.process_entry_blob(row) for row in reader]
+                        survey_data = [
+                            self.survey_data_entry_processor.process_entry_blob(row)
+                            for row in reader
+                        ]
                 else:
                     raise RuntimeError(f"Unsupported data file type at {file_path}")
                 print(f"    generated {len(survey_data)} entries")
@@ -91,14 +112,15 @@ class SurveyDataProcessor:
                 payload = json.loads(json_path.read_text(encoding="utf-8"))
                 for blob in payload:
                     id = blob.get("ec5_uuid")
-                    date = datetime.strptime(blob.get("Survey_Date", ""), "%m/%d/%Y").strftime("%Y-%m-%d")
+                    date = datetime.strptime(
+                        blob.get("Survey_Date", ""), "%m/%d/%Y"
+                    ).strftime("%Y-%m-%d")
                     if id and date:
                         self.survey_dates_map[id] = date
             except Exception as e:
                 print(f"Error processing {file}: {str(e)}")
         self.survey_data_entry_processor.survey_dates_map = self.survey_dates_map
         print(f"Dates processed: {self.survey_dates_map}")
-
 
 
 class SurveyDataEntryProcessor:
@@ -111,7 +133,9 @@ class SurveyDataEntryProcessor:
         for key, value in blob.items():
             normalized_key = self.key_normalization_map.get(key)
             if normalized_key is None:
-                normalized_key = self.key_normalization_map.get(self._normalize_key_name(key))
+                normalized_key = self.key_normalization_map.get(
+                    self._normalize_key_name(key)
+                )
 
             if normalized_key is SurveyDataColumn.EXTERNAL_ID:
                 if not data.get(SurveyDataColumn.EXTERNAL_ID.value):
@@ -134,7 +158,9 @@ class SurveyDataEntryProcessor:
             elif key in {"Location", "location"}:
                 data.update(self._parse_location(value))
             elif normalized_key:
-                data[normalized_key.value] = self._normalize_value(normalized_key, value)
+                data[normalized_key.value] = self._normalize_value(
+                    normalized_key, value
+                )
 
         # default quantity to 1
         if SurveyDataColumn.QUANTITY.value not in data:
@@ -145,7 +171,9 @@ class SurveyDataEntryProcessor:
             date = self.survey_dates_map.get(date_key)
             data[SurveyDataColumn.SURVEY_DATE.value] = self._parse_date(date)
         if data.get(SurveyDataColumn.SURVEY_DATE.value):
-            data[SurveyDataColumn.YEAR] = data.get(SurveyDataColumn.SURVEY_DATE.value).year
+            data[SurveyDataColumn.YEAR] = data.get(
+                SurveyDataColumn.SURVEY_DATE.value
+            ).year
 
         return SurveyData(**data)
 
@@ -215,7 +243,9 @@ class SurveyDataEntryProcessor:
             hours = int(float(str(value).strip()))
             return value, hours, hours
         else:
-            normalized_label = self._normalize_value(SurveyDataColumn.CARCASS_AGE_LABEL, value)
+            normalized_label = self._normalize_value(
+                SurveyDataColumn.CARCASS_AGE_LABEL, value
+            )
             min_age, max_age = CARCASS_AGE_RANGE_MAP.get(normalized_label, (None, None))
             return normalized_label, min_age, max_age
 
@@ -233,12 +263,18 @@ class SurveyDataEntryProcessor:
                 }
         elif isinstance(location_blob, dict):
             return {
-                SurveyDataColumn.LATITUDE.value: self._parse_float(location_blob.get("latitude")),
-                SurveyDataColumn.LONGITUDE.value: self._parse_float(location_blob.get("longitude")),
-                SurveyDataColumn.ACCURACY.value: self._parse_float(location_blob.get("accuracy")),
+                SurveyDataColumn.LATITUDE.value: self._parse_float(
+                    location_blob.get("latitude")
+                ),
+                SurveyDataColumn.LONGITUDE.value: self._parse_float(
+                    location_blob.get("longitude")
+                ),
+                SurveyDataColumn.ACCURACY.value: self._parse_float(
+                    location_blob.get("accuracy")
+                ),
             }
         return {}
-                
+
     def _build_normalization_maps(self):
         self.data_normalization_map = {}
         self.key_normalization_map = {}
@@ -247,7 +283,7 @@ class SurveyDataEntryProcessor:
             for n_value, p_values in value_map.items():
                 all_potential_values = set(p_values)
                 for p_value in p_values:
-                    snake_case = '_'.join(p_value.split(' '))
+                    snake_case = "_".join(p_value.split(" "))
                     if snake_case not in all_potential_values:
                         all_potential_values.add(snake_case)
                 for v in all_potential_values:
@@ -259,6 +295,3 @@ class SurveyDataEntryProcessor:
                 if isinstance(p_key, str):
                     self.key_normalization_map[p_key.lower()] = key
                     self.key_normalization_map[self._normalize_key_name(p_key)] = key
-
-
-

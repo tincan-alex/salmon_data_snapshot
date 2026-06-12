@@ -2,6 +2,7 @@ from enum import StrEnum
 
 from src.access.constructs import AdiposeFinStatus, PredationStatus, SpawnStatus
 
+
 class SurveyDataAssertion(StrEnum):
     EXPECTED_LIVE_COUNT = "expected_live_count"
     EXPECTED_DEAD_COUNT = "expected_dead_count"
@@ -16,6 +17,7 @@ class SurveyDataAssertion(StrEnum):
     ENTRY_WITH_LOCATION = "entry_with_location"
     ENTRY_ON_PIPERS_CREEK = "entry_on_pipers_creek"
 
+
 SURVEY_DATA_PRESENCE_ASSERTIONS = [
     SurveyDataAssertion.ENTRY_WITH_NOTES,
     SurveyDataAssertion.ENTRY_WITH_DISTANCE,
@@ -24,10 +26,22 @@ SURVEY_DATA_PRESENCE_ASSERTIONS = [
 ]
 
 SURVEY_DATA_DISTINCT_VALUE_ASSERTIONS = {
-    SurveyDataAssertion.ADIPOSE_FIN_STATUSES: [status.value for status in AdiposeFinStatus if status != AdiposeFinStatus.UNKNOWN],
-    SurveyDataAssertion.PREDATION_STATUSES: [status.value for status in PredationStatus if status not in [PredationStatus.UNKNOWN, PredationStatus.SCAVENGED]],
-    SurveyDataAssertion.SPAWN_STATUSES: [status.value for status in SpawnStatus if status != SpawnStatus.UNKNOWN],
+    SurveyDataAssertion.ADIPOSE_FIN_STATUSES: [
+        status.value
+        for status in AdiposeFinStatus
+        if status != AdiposeFinStatus.UNKNOWN
+    ],
+    SurveyDataAssertion.PREDATION_STATUSES: [
+        status.value
+        for status in PredationStatus
+        if status not in [PredationStatus.UNKNOWN, PredationStatus.SCAVENGED]
+    ],
+    SurveyDataAssertion.SPAWN_STATUSES: [
+        status.value for status in SpawnStatus if status != SpawnStatus.UNKNOWN
+    ],
 }
+
+SURVEY_DATA_PAPER_YEARS = set(range(2008, 2019))
 
 SURVEY_DATA_EXPECTED_COUNTS_MAP = {
     2019: {

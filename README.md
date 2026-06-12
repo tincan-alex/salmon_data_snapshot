@@ -9,46 +9,42 @@ USAGE:
 
 ```
 python -m src.orchestrator --help                                                                       
-usage: python.exe -m src.orchestrator [-h] [--operation OPERATION] [--process-legacy-data PROCESS_LEGACY_DATA] [--years YEARS [YEARS ...]]
-                                      [--data-sources-path DATA_SOURCES_PATH]
+usage: python.exe -m src.orchestrator [-h] [--operation OPERATION] [--rebuild-db REBUILD_DB] [--years YEARS [YEARS ...]] [--data-sources-path DATA_SOURCES_PATH]
 
-Pull and/or process salmon survey data to update survey_data.db
+Ingest salmon survey data to update survey_data.db
 
 options:
   -h, --help            show this help message and exit
   --operation OPERATION
-                        Specify to snapshot, process, ingest, or validate.
-  --process-legacy-data PROCESS_LEGACY_DATA
-                        Set to true if rebuilding database and processing legacy data from previous snapshots.
+                        Specify to ingest or validate data.
+  --rebuild-db REBUILD_DB
+                        Set to true if rebuilding database.
   --years YEARS [YEARS ...]
-                        Specify list of years of survey data to process when rebuilding database with legacy data from previous snapshots.
+                        Specify list of years of survey data to process if only processing specific years of data.
   --data-sources-path DATA_SOURCES_PATH
-                        Path to JSON list of data sources.
+                        Specify path to JSON list of data sources if ingesting data.
 ```
 
-SAMPLE COMMANDS
-* Ingest the latest data into database and run validation
-`python -m src.orchestrator --operation ingest --data-sources-path .\configs\latest_data_sources.json`
+SAMPLE COMMANDS:
+* Ingest data from latest source into database
+`python -m src.orchestrator --operation ingest --data-sources-path .\configs\latest_data_source.json`
 
-* Create a snapshot from all data sources under `data_snapshots`, but don't insert into database
-`python -m src.orchestrator --operation snapshot --data-sources-path .\configs\all_data_sources.json`
+* Ingest all data from source into database
+`python -m src.orchestrator --operation ingest --data-sources-path .\configs\all_data_sources.json`
 
-* Process the latest data snapshot, insert into database, and run validation
-`python -m src.orchestrator --operation process`
+* Rebuild the database from existing snapshots
+`python -m src.orchestrator --operation ingest --rebuild-db true`
 
-* Process the years of data from 2019 to 2025 from existing snapshots (latest preferred for each year), insert into database, and run validation
-`python -m src.orchestrator --operation process --process-legacy-data true --years 2019 2020 2021 2022 2023 2024 2025`
+* Ingest the years of data from 2015 to 2018 from existing snapshots (latest preferred for each year) into database
+`python -m src.orchestrator --operation ingest --years 2015 2016 2017 2018`
 
-* Only run validation on the current database
+* Run validation on the current database
 `python -m src.orchestrator --operation validate`
 
 
 =======================================================================================================================
 
-todo:
-* assign internal id with external id uniqueness index
-* add pebble column
-* support csv ingestion
+TODO:
 * ask about how to handle certain values
     * is there "unknown" in e.g. sex/predation/adipose fin status or should they all be left blank?
     * how should "-" be treated? should they be filtered/blanked out?

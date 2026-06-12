@@ -6,12 +6,12 @@ from src.constructs import DataSource, DataSourceType
 from src.process.constructs import DEFAULT_DELAYS, EPICOLLECT_DELAYS
 
 
-class SurveyDataPuller:
+class SurveyDataIngester:
     def __init__(self, data_sources: list[DataSource], destination_path: str):
         self.data_sources = data_sources
         self.path = destination_path
 
-    def pull_data(self):
+    def ingest_data(self):
         for source in self.data_sources:
             self._process_source(source)
 
@@ -24,9 +24,15 @@ class SurveyDataPuller:
 
         while url:
             print(f"Fetching {label} page {page}...")
-            entries, url = self._fetch_page(url=url, label=f"{label}_{page}", is_epicollect=source.source_type == DataSourceType.EPICOLLECT)
+            entries, url = self._fetch_page(
+                url=url,
+                label=f"{label}_{page}",
+                is_epicollect=source.source_type == DataSourceType.EPICOLLECT,
+            )
             if entries is None:
-                print(f"Stopping load for {label} page {page} because the page failed or was malformed.")
+                print(
+                    f"Stopping load for {label} page {page} because the page failed or was malformed."
+                )
                 break
             path = self.path / f"{label}_{page}.json"
             with open(path, "w", encoding="utf-8") as file:
@@ -59,7 +65,9 @@ class SurveyDataPuller:
                 if isinstance(entries, list):
                     return entries, next_uri
 
-                print(f"[{label}] malformed response attempt {attempt} for {url}: missing entries")
+                print(
+                    f"[{label}] malformed response attempt {attempt} for {url}: missing entries"
+                )
 
             if attempt == len(delays):
                 print(f"[{label}] giving up after {attempt} attempts for {url}")
@@ -67,5 +75,5 @@ class SurveyDataPuller:
 
             next_delay = delays[attempt] if attempt < len(delays) else 0
             print(f"[{label}] retrying in {next_delay} seconds...")
-        
+
         return None, None

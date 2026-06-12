@@ -3,7 +3,8 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Optional, OrderedDict
 
-SURVEY_DATA_TABLE_NAME = 'survey_data'
+SURVEY_DATA_TABLE_NAME = "survey_data"
+
 
 class SurveyDataColumn(StrEnum):
     ID = "id"
@@ -59,14 +60,17 @@ SURVEY_DATA_COLUMNS_TO_TYPE: OrderedDict[str, str] = {
     SurveyDataColumn.NOTE: "TEXT",
 }
 
+
 class StreamLabel(StrEnum):
     PIPER = "Piper's Creek"
     VENEMA = "Venema Creek"
+
 
 class SurveyType(StrEnum):
     LIVE = "Live"
     DEAD = "Dead"
     REDD = "Redd"
+
 
 class Species(StrEnum):
     CHUM = "Chum"
@@ -77,10 +81,12 @@ class Species(StrEnum):
     RES_CUTTHROAT = "Resident Cutthroat"
     UNKNOWN = "Unknown"
 
+
 class Sex(StrEnum):
     MALE = "Male"
     FEMALE = "Female"
     UNKNOWN = "Unknown"
+
 
 class CarcassAge(StrEnum):
     LESS_THAN_1_HOUR = "Less than 1 hour"
@@ -88,10 +94,12 @@ class CarcassAge(StrEnum):
     LESS_THAN_24_HOURS = "12-24 hours"
     GREATER_THAN_24_HOURS = "Greater than 24 hours"
 
+
 class AdiposeFinStatus(StrEnum):
     YES = "Yes"
     NO = "No"
     UNKNOWN = "Unknown"
+
 
 class PredationStatus(StrEnum):
     PREDATION = "Predation"
@@ -100,11 +108,13 @@ class PredationStatus(StrEnum):
     SCAVENGED = "Scavenged"
     UNKNOWN = "Unknown"
 
+
 class SpawnStatus(StrEnum):
     SPAWNED = "Spawned"
     UNSPAWNED = "Unspawned"
     PARTIAL = "Partially spawned"
     UNKNOWN = "Unknown"
+
 
 class LifeStage(StrEnum):
     ADULT = "Adult"
@@ -113,6 +123,7 @@ class LifeStage(StrEnum):
     SECOND_YEAR = "2nd year"
     THIRD_YEAR = "3rd year"
     UNKNOWN = "Unknown"
+
 
 @dataclass
 class SurveyData:
@@ -146,5 +157,3 @@ class SurveyData:
         for c in SURVEY_DATA_COLUMNS_TO_TYPE.keys():
             values.append(getattr(self, c))
         return tuple(values)
-
-
