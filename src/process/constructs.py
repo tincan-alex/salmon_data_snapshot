@@ -3,6 +3,9 @@ from pathlib import Path
 
 from src.access.constructs import (
     CarcassAge,
+    CarcassLocation,
+    CarcassState,
+    ReddSubstrate,
     SurveyDataColumn,
     SurveyType,
     StreamLabel,
@@ -33,8 +36,13 @@ SURVEY_DATA_POTENTIAL_VALUES_MAP = {
         Species.CHINOOK: {"chinook", "ck"},
         Species.SOCKEYE: {"sockeye", "so"},
         Species.SEA_RUN_CUTTHROAT: {"sea-run cutthroat"},
-        Species.RES_CUTTHROAT: {"resident cutthroat"},
+        Species.RESIDENT_CUTTHROAT: {"resident cutthroat", "res ct"},
+        Species.CUTTHROAT: {"cutthroat", "ct"},
         Species.UNKNOWN: {"unknown", "u", "unk", "uk"},
+    },
+    SurveyDataColumn.REDD_SUBSTRATE: {
+        ReddSubstrate.RIFFLE: {"riffle", "r"},
+        ReddSubstrate.GRAVEL: {"gravel", "g"},
     },
     SurveyDataColumn.SEX: {
         Sex.MALE: {"male", "m"},
@@ -43,7 +51,7 @@ SURVEY_DATA_POTENTIAL_VALUES_MAP = {
     },
     SurveyDataColumn.LIFE_STAGE: {
         LifeStage.ADULT: {"adult", "a", "ad"},
-        LifeStage.JUVENILE: {"juvenile", "j", "ju"},
+        LifeStage.YOUNG: {"juvenile", "j", "ju", "young", "y"},
         LifeStage.FIRST_YEAR: {"1st year", "1", "1yr", "first year"},
         LifeStage.SECOND_YEAR: {"2nd year", "2", "2 yr", "second year"},
         LifeStage.THIRD_YEAR: {"3rd year", "3", "3 yr", "third year"},
@@ -67,11 +75,22 @@ SURVEY_DATA_POTENTIAL_VALUES_MAP = {
         SpawnStatus.UNKNOWN: {"unknown", "u", "unk", "uk"},
     },
     SurveyDataColumn.PREDATION: {
-        PredationStatus.PREDATION: {"predation", "yes", "y"},
-        PredationStatus.NO_DAMAGE: {"no damage", "no", "n"},
-        PredationStatus.EYE_LOSS_ONLY: {"eye loss only", "eye loss"},
-        PredationStatus.SCAVENGED: {"scavenged", "s", "sc"},
-        PredationStatus.UNKNOWN: {"unknown", "u", "unk", "uk"},
+        PredationStatus.PREDATED: {"predation", "yes", "y", "partial", "n/p", "n/y"},
+        PredationStatus.SCAVENGED: {"scavenged", "s", "sc", "s/n", "y/n"},
+        PredationStatus.BOTH: {"s/p", "p/s", "s/y", "y/p"},
+        PredationStatus.NO: {"no damage", "no", "n"},
+        PredationStatus.UNKNOWN: {"unknown", "u", "unk", "uk", "eye loss only", "eye loss"},
+    },
+    SurveyDataColumn.CARCASS_STATE: {
+        CarcassState.DAMAGED: {"predation", "scavenged", "s", "sc", "p", "partial", "yes", "y", "s/p", "p/s", "y/n", "n/y", "s/y", "y/p"},
+        CarcassState.NO_DAMAGE: {"no damage", "no", "n"},
+        CarcassState.EYE_LOSS: {"eye loss only", "eye loss"},
+        CarcassState.UNKNOWN: {"unknown", "u", "unk", "uk"},
+    },
+    SurveyDataColumn.LOCATION: {
+        CarcassLocation.OUTSIDE_OF_CREEK: {"outside of creek"},
+        CarcassLocation.ON_CREEK_BANK: {"on creek bank"},
+        CarcassLocation.IN_CREEK: {"in creek"},
     },
 }
 
@@ -87,11 +106,12 @@ SURVEY_DATA_POTENTIAL_KEYS_MAP = {
     SurveyDataColumn.SEX: {"sex"},
     SurveyDataColumn.LIFE_STAGE: {"life_stage"},
     SurveyDataColumn.ADIPOSE_FIN: {"adipose_fin"},
-    SurveyDataColumn.LENGTH: {"length_inches", "length"},
+    SurveyDataColumn.LENGTH: {"length_inches", "length", "standard_length"},
     SurveyDataColumn.WIDTH: {"width_inches", "width"},
-    SurveyDataColumn.CARCASS_AGE_LABEL: {"carcass_age", "hours_since_death"},
+    SurveyDataColumn.CARCASS_AGE_LABEL: {"carcass_age", "hours_since_death", "carcass_age_hours"},
     SurveyDataColumn.SPAWNED: {"spawning_success", "spawned"},
     SurveyDataColumn.PREDATION: {"predation"},
+    SurveyDataColumn.LOCATION: {"carcass_location"},
     SurveyDataColumn.NOTE: {"notes"},
 }
 

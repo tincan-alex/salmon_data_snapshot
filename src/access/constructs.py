@@ -17,6 +17,7 @@ class SurveyDataColumn(StrEnum):
     SPECIES = "species"
     GRAVEL = "gravel"
     QUANTITY = "quantity"
+    REDD_SUBSTRATE = "redd_substrate"
     SEX = "sex"
     LIFE_STAGE = "life_stage"
     ADIPOSE_FIN = "adipose_fin"
@@ -25,11 +26,13 @@ class SurveyDataColumn(StrEnum):
     CARCASS_AGE_LABEL = "carcass_age_label"
     CARCASS_AGE_MIN = "carcass_age_min"
     CARCASS_AGE_MAX = "carcass_age_max"
+    CARCASS_STATE = "carcass_state"
     SPAWNED = "spawned"
     PREDATION = "predation"
     LATITUDE = "latitude"
     LONGITUDE = "longitude"
     ACCURACY = "accuracy"
+    LOCATION = "location"
     NOTE = "note"
 
 
@@ -44,6 +47,7 @@ SURVEY_DATA_COLUMNS_TO_TYPE: OrderedDict[str, str] = {
     SurveyDataColumn.GRAVEL: "TEXT",
     SurveyDataColumn.SPECIES: "TEXT",
     SurveyDataColumn.QUANTITY: "INTEGER",
+    SurveyDataColumn.REDD_SUBSTRATE: "TEXT",
     SurveyDataColumn.SEX: "TEXT",
     SurveyDataColumn.LIFE_STAGE: "TEXT",
     SurveyDataColumn.ADIPOSE_FIN: "TEXT",
@@ -52,11 +56,13 @@ SURVEY_DATA_COLUMNS_TO_TYPE: OrderedDict[str, str] = {
     SurveyDataColumn.CARCASS_AGE_LABEL: "TEXT",
     SurveyDataColumn.CARCASS_AGE_MIN: "INTEGER",
     SurveyDataColumn.CARCASS_AGE_MAX: "INTEGER",
+    SurveyDataColumn.CARCASS_STATE: "TEXT",
     SurveyDataColumn.SPAWNED: "TEXT",
     SurveyDataColumn.PREDATION: "TEXT",
     SurveyDataColumn.LATITUDE: "FLOAT",
     SurveyDataColumn.LONGITUDE: "FLOAT",
     SurveyDataColumn.ACCURACY: "FLOAT",
+    SurveyDataColumn.LOCATION: "TEXT",
     SurveyDataColumn.NOTE: "TEXT",
 }
 
@@ -78,8 +84,13 @@ class Species(StrEnum):
     CHINOOK = "Chinook"
     SOCKEYE = "Sockeye"
     SEA_RUN_CUTTHROAT = "Sea-run Cutthroat"
-    RES_CUTTHROAT = "Resident Cutthroat"
+    RESIDENT_CUTTHROAT = "Resident Cutthroat"
+    CUTTHROAT = "Cutthroat"
     UNKNOWN = "Unknown"
+
+class ReddSubstrate(StrEnum):
+    RIFFLE = "Riffle"
+    GRAVEL = "Gravel"
 
 
 class Sex(StrEnum):
@@ -95,17 +106,29 @@ class CarcassAge(StrEnum):
     GREATER_THAN_24_HOURS = "Greater than 24 hours"
 
 
+class CarcassLocation(StrEnum):
+    OUTSIDE_OF_CREEK = "Outside of creek"
+    ON_CREEK_BANK = "On creek bank"
+    IN_CREEK = "In creek"
+
+
 class AdiposeFinStatus(StrEnum):
     YES = "Yes"
     NO = "No"
     UNKNOWN = "Unknown"
 
 
-class PredationStatus(StrEnum):
-    PREDATION = "Predation"
+class CarcassState(StrEnum):
+    DAMAGED = "Damaged"
     NO_DAMAGE = "No damage"
-    EYE_LOSS_ONLY = "Eye loss only"
+    EYE_LOSS = "Eye loss"
+    UNKNOWN = "Unknown"
+
+class PredationStatus(StrEnum):
+    PREDATED = "Predated"
     SCAVENGED = "Scavenged"
+    BOTH = "Both"
+    NO = "No predation"
     UNKNOWN = "Unknown"
 
 
@@ -118,7 +141,7 @@ class SpawnStatus(StrEnum):
 
 class LifeStage(StrEnum):
     ADULT = "Adult"
-    JUVENILE = "Juvenile"
+    YOUNG = "Young"
     FIRST_YEAR = "1st year"
     SECOND_YEAR = "2nd year"
     THIRD_YEAR = "3rd year"
@@ -137,6 +160,7 @@ class SurveyData:
     species: Optional[str] = None
     quantity: Optional[int] = None
     gravel: Optional[str] = None
+    redd_substrate: Optional[Sex] = None
     sex: Optional[Sex] = None
     life_stage: Optional[str] = None
     adipose_fin: Optional[AdiposeFinStatus] = None
@@ -145,11 +169,13 @@ class SurveyData:
     carcass_age_label: Optional[str] = None
     carcass_age_min: Optional[int] = None
     carcass_age_max: Optional[int] = None
+    carcass_state: Optional[CarcassState] = None
     spawned: Optional[SpawnStatus] = None
     predation: Optional[PredationStatus] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     accuracy: Optional[float] = None
+    location: Optional[str] = None
     note: Optional[str] = None
 
     def to_db_values(self):

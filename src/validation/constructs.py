@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from src.access.constructs import AdiposeFinStatus, PredationStatus, SpawnStatus
+from src.access.constructs import AdiposeFinStatus, CarcassState, SpawnStatus
 
 
 class SurveyDataAssertion(StrEnum):
@@ -10,7 +10,7 @@ class SurveyDataAssertion(StrEnum):
     EXPECTED_CHUM_COUNT = "expected_chum_count"
     EXPECTED_COHO_COUNT = "expected_coho_count"
     ADIPOSE_FIN_STATUSES = "adipose_fin_statuses"
-    PREDATION_STATUSES = "predation_statuses"
+    CARCASS_STATUSES = "carcass_statuses"
     SPAWN_STATUSES = "spawn_statuses"
     ENTRY_WITH_NOTES = "entry_with_notes"
     ENTRY_WITH_DISTANCE = "entry_with_distance"
@@ -31,10 +31,10 @@ SURVEY_DATA_DISTINCT_VALUE_ASSERTIONS = {
         for status in AdiposeFinStatus
         if status != AdiposeFinStatus.UNKNOWN
     ],
-    SurveyDataAssertion.PREDATION_STATUSES: [
+    SurveyDataAssertion.CARCASS_STATUSES: [
         status.value
-        for status in PredationStatus
-        if status not in [PredationStatus.UNKNOWN, PredationStatus.SCAVENGED]
+        for status in CarcassState
+        if status != CarcassState.UNKNOWN
     ],
     SurveyDataAssertion.SPAWN_STATUSES: [
         status.value for status in SpawnStatus if status != SpawnStatus.UNKNOWN

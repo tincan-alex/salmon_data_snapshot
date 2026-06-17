@@ -93,8 +93,8 @@ class SurveyDataValidator:
             SurveyDataAssertion.ADIPOSE_FIN_STATUSES: self._get_distinct_counts(
                 SurveyDataColumn.ADIPOSE_FIN, year
             ),
-            SurveyDataAssertion.PREDATION_STATUSES: self._get_distinct_counts(
-                SurveyDataColumn.PREDATION, year
+            SurveyDataAssertion.CARCASS_STATUSES: self._get_distinct_counts(
+                SurveyDataColumn.CARCASS_STATE, year
             ),
             SurveyDataAssertion.SPAWN_STATUSES: self._get_distinct_counts(
                 SurveyDataColumn.SPAWNED, year

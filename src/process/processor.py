@@ -130,6 +130,7 @@ class SurveyDataEntryProcessor:
 
     def process_entry_blob(self, blob: dict) -> SurveyData:
         data: dict[str, Any] = {}
+        additional_notes: list[str] = []
         for key, value in blob.items():
             normalized_key = self.key_normalization_map.get(key)
             if normalized_key is None:
@@ -151,10 +152,12 @@ class SurveyDataEntryProcessor:
             elif normalized_key is SurveyDataColumn.WIDTH:
                 data[SurveyDataColumn.WIDTH.value] = self._parse_float(value)
             elif normalized_key is SurveyDataColumn.CARCASS_AGE_LABEL:
-                label, min_age, max_age = self._parse_carcass_age(value)
-                data[SurveyDataColumn.CARCASS_AGE_LABEL.value] = label
-                data[SurveyDataColumn.CARCASS_AGE_MIN.value] = min_age
-                data[SurveyDataColumn.CARCASS_AGE_MAX.value] = max_age
+                data.update(self._parse_carcass_age(value))
+            elif normalized_key is SurveyDataColumn.PREDATION:
+                data[SurveyDataColumn.PREDATION.value] = self._normalize_value(SurveyDataColumn.PREDATION, value)
+                data[SurveyDataColumn.CARCASS_STATE.value] = self._normalize_value(SurveyDataColumn.CARCASS_STATE, value)
+                if '/' in value:
+                    additional_notes.append(f"original predation status: {value}")
             elif key in {"Location", "location"}:
                 data.update(self._parse_location(value))
             elif normalized_key:
@@ -165,6 +168,12 @@ class SurveyDataEntryProcessor:
         # default quantity to 1
         if SurveyDataColumn.QUANTITY.value not in data:
             data[SurveyDataColumn.QUANTITY.value] = 1
+        # addend notes
+        if additional_notes:
+            notes = data.get(SurveyDataColumn.NOTE.value)
+            if notes:
+                additional_notes.insert(0, notes)
+            data[SurveyDataColumn.NOTE.value] = '; '.join(additional_notes)
         # fetch survey date from map for epicollect data
         if SurveyDataColumn.SURVEY_DATE.value not in data:
             date_key = blob.get("ec5_parent_uuid")
@@ -220,14 +229,8 @@ class SurveyDataEntryProcessor:
             return False
         return number.is_integer()
 
-    def _normalize_string(self, value):
-        if value is None:
-            return None
-        text = str(value).strip().replace("_", " ")
-        return text or None
-
     def _normalize_value(self, normalized_key, value):
-        if not value:
+        if not value or value == '-':
             return None
         lookup = self.data_normalization_map.get(normalized_key, {})
         normalized_value = lookup.get(str(value).strip().lower())
@@ -241,13 +244,21 @@ class SurveyDataEntryProcessor:
     def _parse_carcass_age(self, value):
         if self._is_int(value):
             hours = int(float(str(value).strip()))
-            return value, hours, hours
+            return {
+                SurveyDataColumn.CARCASS_AGE_LABEL.value: value,
+                SurveyDataColumn.CARCASS_AGE_MIN.value: hours,
+                SurveyDataColumn.CARCASS_AGE_MAX.value: hours,
+            }
         else:
             normalized_label = self._normalize_value(
                 SurveyDataColumn.CARCASS_AGE_LABEL, value
             )
             min_age, max_age = CARCASS_AGE_RANGE_MAP.get(normalized_label, (None, None))
-            return normalized_label, min_age, max_age
+            return {
+                SurveyDataColumn.CARCASS_AGE_LABEL.value: normalized_label,
+                SurveyDataColumn.CARCASS_AGE_MIN.value: min_age,
+                SurveyDataColumn.CARCASS_AGE_MAX.value: max_age,
+            }
 
     def _parse_location(self, location_blob):
         if isinstance(location_blob, str):
@@ -260,6 +271,10 @@ class SurveyDataEntryProcessor:
                     SurveyDataColumn.LATITUDE.value: lat,
                     SurveyDataColumn.LONGITUDE.value: lon,
                     SurveyDataColumn.ACCURACY.value: accuracy,
+                }
+            else:
+                return {
+                    SurveyDataColumn.LOCATION.value: location_blob
                 }
         elif isinstance(location_blob, dict):
             return {
