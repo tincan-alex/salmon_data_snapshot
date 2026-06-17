@@ -1,8 +1,6 @@
 name: Daily ingest and rebase
 
 on:
-  schedule:
-    - cron: "0 9 * * *"   # daily at 09:00 UTC
   workflow_dispatch:       # allow manual trigger
 
 jobs:
