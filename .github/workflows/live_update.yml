@@ -1,0 +1,50 @@
+name: Daily ingest and rebase
+
+on:
+  schedule:
+    - cron: "0 9 * * *"   # daily at 09:00 UTC
+  workflow_dispatch:       # allow manual trigger
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v7
+        with:
+          ref: live-update-test
+          fetch-depth: 0   # required for rebase
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Rebase on main
+        run: |
+          git fetch origin main
+          git rebase origin/main
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          pip-install: "requests"
+
+      - name: Run ingest script
+        id: ingest
+        run: |
+          python -m src.orchestrator --operation ingest --data-sources-path ./configs/latest_data_source.json
+
+      - name: Commit and push if changes exist
+        if: success()
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "Changes detected, committing..."
+            git add -A
+            git commit -m "Daily ingest update"
+            git push --force-with-lease origin HEAD:live-update-test
+          else
+            echo "No changes to commit."
+          fi
