@@ -1,7 +1,7 @@
 name: Daily ingest and rebase
 
 on:
-  workflow_dispatch:       # allow manual trigger
+  workflow_dispatch:
 
 jobs:
   ingest:
@@ -12,7 +12,8 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: live-update-test
-          fetch-depth: 0   # required for rebase
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Configure git identity
         run: |
@@ -37,12 +38,12 @@ jobs:
 
       - name: Commit and push if changes exist
         if: success()
-        run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "Changes detected, committing..."
-            git add -A
-            git commit -m "Daily ingest update"
-            git push --force-with-lease origin HEAD:live-update-test
-          else
-            echo "No changes to commit."
-          fi
+        id: auto-commit-action
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: 'Daily update commit'
+          branch: live-update-test
+          file_pattern: '*.db'
+          push_options: '--force-with-lease'
+          skip_push: false
+          create_branch: false
