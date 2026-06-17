@@ -1,6 +1,8 @@
 name: Daily ingest and rebase
 
 on:
+  schedule:
+    - cron: "0 22 * * *"
   workflow_dispatch:
 
 jobs:
