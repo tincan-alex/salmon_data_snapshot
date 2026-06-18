@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "0 22 * * *"
   workflow_dispatch:
+    inputs:
+      update_branch:
+        description: 'Branch to push db update to'
+        default: 'live-update-test'
+        type: string
 
 jobs:
   ingest:
@@ -15,7 +20,7 @@ jobs:
       - name: Checkout target branch
         uses: actions/checkout@v6
         with:
-          ref: live-update-test
+          ref: ${{inputs.update_branch}}
           fetch-depth: 0
           persist-credentials: true
 
@@ -24,10 +29,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Rebase on main
+      - name: Get updates from main
         run: |
-          git fetch origin main
-          git rebase origin/main
+          git checkout main
+          git fetch origin
+          git checkout ${{inputs.update_branch}}
+          git pull
+          git merge origin/main
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -46,7 +54,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: 'Daily update commit'
-          branch: live-update-test
+          branch: ${{inputs.update_branch}}
           file_pattern: '*.db'
           push_options: '--force-with-lease'
           skip_push: false
