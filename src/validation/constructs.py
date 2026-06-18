@@ -32,9 +32,7 @@ SURVEY_DATA_DISTINCT_VALUE_ASSERTIONS = {
         if status != AdiposeFinStatus.UNKNOWN
     ],
     SurveyDataAssertion.CARCASS_STATUSES: [
-        status.value
-        for status in CarcassState
-        if status != CarcassState.UNKNOWN
+        status.value for status in CarcassState if status != CarcassState.UNKNOWN
     ],
     SurveyDataAssertion.SPAWN_STATUSES: [
         status.value for status in SpawnStatus if status != SpawnStatus.UNKNOWN

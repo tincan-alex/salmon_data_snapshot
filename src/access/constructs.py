@@ -88,6 +88,7 @@ class Species(StrEnum):
     CUTTHROAT = "Cutthroat"
     UNKNOWN = "Unknown"
 
+
 class ReddSubstrate(StrEnum):
     RIFFLE = "Riffle"
     GRAVEL = "Gravel"
@@ -123,6 +124,7 @@ class CarcassState(StrEnum):
     NO_DAMAGE = "No damage"
     EYE_LOSS = "Eye loss"
     UNKNOWN = "Unknown"
+
 
 class PredationStatus(StrEnum):
     PREDATED = "Predated"

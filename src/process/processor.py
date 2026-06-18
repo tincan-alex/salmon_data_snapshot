@@ -146,7 +146,9 @@ class SurveyDataEntryProcessor:
             elif normalized_key is SurveyDataColumn.DISTANCE:
                 data[SurveyDataColumn.DISTANCE.value] = self._parse_int(value)
             elif normalized_key is SurveyDataColumn.QUANTITY:
-                data[SurveyDataColumn.QUANTITY.value] = self._parse_int(value)
+                parsed_qty = self._parse_int(value)
+                if parsed_qty is not None:
+                    data[SurveyDataColumn.QUANTITY.value] = parsed_qty
             elif normalized_key is SurveyDataColumn.LENGTH:
                 data[SurveyDataColumn.LENGTH.value] = self._parse_float(value)
             elif normalized_key is SurveyDataColumn.WIDTH:
@@ -154,9 +156,13 @@ class SurveyDataEntryProcessor:
             elif normalized_key is SurveyDataColumn.CARCASS_AGE_LABEL:
                 data.update(self._parse_carcass_age(value))
             elif normalized_key is SurveyDataColumn.PREDATION:
-                data[SurveyDataColumn.PREDATION.value] = self._normalize_value(SurveyDataColumn.PREDATION, value)
-                data[SurveyDataColumn.CARCASS_STATE.value] = self._normalize_value(SurveyDataColumn.CARCASS_STATE, value)
-                if '/' in value:
+                data[SurveyDataColumn.PREDATION.value] = self._normalize_value(
+                    SurveyDataColumn.PREDATION, value
+                )
+                data[SurveyDataColumn.CARCASS_STATE.value] = self._normalize_value(
+                    SurveyDataColumn.CARCASS_STATE, value
+                )
+                if "/" in value:
                     additional_notes.append(f"original predation status: {value}")
             elif key in {"Location", "location"}:
                 data.update(self._parse_location(value))
@@ -173,7 +179,7 @@ class SurveyDataEntryProcessor:
             notes = data.get(SurveyDataColumn.NOTE.value)
             if notes:
                 additional_notes.insert(0, notes)
-            data[SurveyDataColumn.NOTE.value] = '; '.join(additional_notes)
+            data[SurveyDataColumn.NOTE.value] = "; ".join(additional_notes)
         # fetch survey date from map for epicollect data
         if SurveyDataColumn.SURVEY_DATE.value not in data:
             date_key = blob.get("ec5_parent_uuid")
@@ -230,7 +236,7 @@ class SurveyDataEntryProcessor:
         return number.is_integer()
 
     def _normalize_value(self, normalized_key, value):
-        if not value or value == '-':
+        if not value or value == "-":
             return None
         lookup = self.data_normalization_map.get(normalized_key, {})
         normalized_value = lookup.get(str(value).strip().lower())
@@ -273,9 +279,7 @@ class SurveyDataEntryProcessor:
                     SurveyDataColumn.ACCURACY.value: accuracy,
                 }
             else:
-                return {
-                    SurveyDataColumn.LOCATION.value: location_blob
-                }
+                return {SurveyDataColumn.LOCATION.value: location_blob}
         elif isinstance(location_blob, dict):
             return {
                 SurveyDataColumn.LATITUDE.value: self._parse_float(
