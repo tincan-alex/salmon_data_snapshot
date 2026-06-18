@@ -1,33 +1,46 @@
 name: Daily ingest and rebase
 
 on:
-  workflow_dispatch:       # allow manual trigger
+  schedule:
+    - cron: "0 22 * OCT,NOV,DEC *"
+  workflow_dispatch:
+    inputs:
+      update_branch:
+        description: 'Branch to push db update to'
+        default: 'live-updates'
+        type: string
 
 jobs:
   ingest:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout target branch
-        uses: actions/checkout@v7
+        uses: actions/checkout@v6
         with:
-          ref: live-update-test
-          fetch-depth: 0   # required for rebase
+          ref: ${{inputs.update_branch}}
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Configure git identity
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Rebase on main
+      - name: Get updates from main
         run: |
-          git fetch origin main
-          git rebase origin/main
+          git checkout main
+          git fetch origin
+          git checkout ${{inputs.update_branch}}
+          git pull
+          git merge origin/main
 
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.14"
           pip-install: "requests"
 
       - name: Run ingest script
@@ -37,12 +50,12 @@ jobs:
 
       - name: Commit and push if changes exist
         if: success()
-        run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "Changes detected, committing..."
-            git add -A
-            git commit -m "Daily ingest update"
-            git push --force-with-lease origin HEAD:live-update-test
-          else
-            echo "No changes to commit."
-          fi
+        id: auto-commit-action
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: 'Daily update commit'
+          branch: ${{inputs.update_branch}}
+          file_pattern: '*.db'
+          push_options: '--force-with-lease'
+          skip_push: false
+          create_branch: false
