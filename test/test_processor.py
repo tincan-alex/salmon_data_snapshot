@@ -7,6 +7,7 @@ from src.access.constructs import (
     CarcassState,
     PredationStatus,
     Species,
+    StreamLabel,
     SurveyDataColumn,
 )
 from src.process.processor import SurveyDataEntryProcessor
@@ -129,12 +130,18 @@ def test_process_entry_blob_sample_blobs(blob, expected):
             },
         ),
         (
-            {"_id": "external-1", "notes": "note1", "predation": "y/n"},
+            {
+                "_id": "external-1",
+                "notes": "note1",
+                "predation": "y/n",
+                "stream": "Mohlendorph_Creek",
+            },
             {
                 SurveyDataColumn.EXTERNAL_ID: "external-1",
                 SurveyDataColumn.NOTE: "note1; original predation status: y/n",
                 SurveyDataColumn.PREDATION: PredationStatus.SCAVENGED,
                 SurveyDataColumn.CARCASS_STATE: CarcassState.DAMAGED,
+                SurveyDataColumn.STREAM: StreamLabel.MOHLENDORPH,
             },
         ),
     ],

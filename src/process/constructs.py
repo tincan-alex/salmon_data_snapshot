@@ -29,6 +29,7 @@ SURVEY_DATA_POTENTIAL_VALUES_MAP = {
     SurveyDataColumn.STREAM: {
         StreamLabel.PIPER: {"piper", "pipers creek", "piper's creek"},
         StreamLabel.VENEMA: {"venema", "venema creek"},
+        StreamLabel.MOHLENDORPH: {"mohlendorph", "mohlendorph creek"},
     },
     SurveyDataColumn.SPECIES: {
         Species.CHUM: {"chum", "ch"},

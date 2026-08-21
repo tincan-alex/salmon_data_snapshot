@@ -70,6 +70,7 @@ SURVEY_DATA_COLUMNS_TO_TYPE: OrderedDict[str, str] = {
 class StreamLabel(StrEnum):
     PIPER = "Piper's Creek"
     VENEMA = "Venema Creek"
+    MOHLENDORPH = "Mohlendorph Creek"
 
 
 class SurveyType(StrEnum):
