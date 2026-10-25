@@ -1,8 +1,8 @@
 name: Daily ingest and rebase
 
 on:
-  schedule:
-    - cron: "0 22 * OCT,NOV,DEC *"
+  # schedule:
+  #   - cron: "0 22 * OCT,NOV,DEC *"
   workflow_dispatch:
     inputs:
       update_branch:
