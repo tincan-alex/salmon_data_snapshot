@@ -64,5 +64,11 @@
         "url": "https://kf.kobotoolbox.org/api/v2/assets/a5WFFCGawCP3aTLHdRjrca/data/?format=json",
         "data_type": "survey",
         "year": 2025
+    },
+    {
+        "source_type": "kobotoolbox",
+        "url": "https://kf.kobotoolbox.org/api/v2/assets/aK65VQaWfjf2sH7yK3GAkB/data/?format=json",
+        "data_type": "survey",
+        "year": 2026
     }
 ]
