@@ -32,3 +32,4 @@ class DataOrchestratorConfig:
     data_sources: list[DataSource] = field(default_factory=list)
     rebuild_db: bool = False
     years_to_process: list[int] = field(default_factory=list)
+    is_active_ingestion: bool = False

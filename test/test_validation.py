@@ -65,3 +65,15 @@ def test_validate_db_with_mismatched_snapshot_raises(
 
     with pytest.raises(AssertionError):
         validator.validate_db(info_snapshot=bad_snapshot)
+
+
+def test_validate_db_allows_latest_year_growth_when_active_ingestion(
+    survey_data_dao, insert_survey_data
+):
+    insert_survey_data("e1", datetime(2024, 1, 1), Species.CHUM, 1, 2024)
+
+    validator = SurveyDataValidator(survey_data_dao)
+    snapshot = validator.get_survey_data_yearly_stats()
+    insert_survey_data("e2", datetime(2024, 1, 2), Species.CHUM, 2, 2024)
+
+    validator.validate_db(info_snapshot=snapshot, is_active_ingestion=True)

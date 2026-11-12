@@ -46,7 +46,7 @@ jobs:
       - name: Run ingest script
         id: ingest
         run: |
-          python -m src.orchestrator --operation ingest --data-sources-path ./configs/latest_data_source.json
+          python -m src.orchestrator --operation ingest --is-active-ingestion --data-sources-path ./configs/latest_data_source.json
 
       - name: Commit and push if changes exist
         if: success()

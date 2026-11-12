@@ -56,7 +56,10 @@ class DataOrchestrator:
                 processor.process_path(self.snapshot_path)
                 print(f"PROCESSED DATA at {self.snapshot_path}")
 
-            validator.validate_db(self.yearly_info_snapshot)
+            validator.validate_db(
+                self.yearly_info_snapshot,
+                is_active_ingestion=self.config.is_active_ingestion,
+            )
             print(f"VALIDATED survey data at {self.db_path}")
 
     def create_data_snapshot(self):
@@ -94,6 +97,7 @@ def parse_config_from_args(args: argparse.Namespace) -> DataOrchestratorConfig:
         rebuild_db=args.rebuild_db,
         data_sources=data_sources,
         years_to_process=args.years,
+        is_active_ingestion=args.is_active_ingestion,
     )
 
 
@@ -119,6 +123,12 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=[],
         help="Specify list of years of survey data to process if only processing specific years of data.",
+    )
+    parser.add_argument(
+        "--is-active-ingestion",
+        action="store_true",
+        default=False,
+        help="Allow the latest year to grow while the season is still actively ingesting data.",
     )
     parser.add_argument(
         "--data-sources-path",

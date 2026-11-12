@@ -39,12 +39,21 @@ class SurveyDataValidator:
     #   - there exist piper creek entries
     #   - there exist lat and lon values
     # sanity checks are warnings if the current year is the latest year in db
-    def validate_db(self, info_snapshot=None, raise_on_failure=True):
+    def validate_db(
+        self,
+        info_snapshot=None,
+        raise_on_failure=True,
+        is_active_ingestion=False,
+    ):
         print("Running validation on database...")
         yearly_info = self.get_survey_data_yearly_stats()
 
         if info_snapshot:
-            errors, warnings = self._run_comparison(yearly_info, info_snapshot)
+            errors, warnings = self._run_comparison(
+                yearly_info,
+                info_snapshot,
+                is_active_ingestion=is_active_ingestion,
+            )
         else:
             errors, warnings = self._run_validation(yearly_info)
 
@@ -113,11 +122,12 @@ class SurveyDataValidator:
             ),
         }
 
-    def _run_comparison(self, yearly_info, yearly_info_snapshot):
+    def _run_comparison(self, yearly_info, yearly_info_snapshot, is_active_ingestion=False):
         new_years = set(yearly_info.keys())
         prev_years = set(yearly_info_snapshot.keys())
         errors = []
         warnings = []
+        latest_year = max(new_years) if new_years else None
         if new_years - prev_years:
             print(f"Additional years of data present: {new_years - prev_years}")
         if prev_years - new_years:
@@ -129,6 +139,15 @@ class SurveyDataValidator:
             for assertion, value in info.items():
                 prev_value = snapshot.get(assertion)
                 if value != prev_value:
+                    if (
+                        is_active_ingestion
+                        and year == latest_year
+                        and self._allows_latest_year_growth(value, prev_value)
+                    ):
+                        warnings.append(
+                            f"ALLOWING growth in latest year during active ingestion: {year} {assertion}: expected {prev_value}, got {value}"
+                        )
+                        continue
                     errors.append(
                         f"FAILED comparison on {year} {assertion}: expected {prev_value}, got {value}"
                     )
@@ -145,6 +164,18 @@ class SurveyDataValidator:
             warnings += validation_warnings
 
         return errors, warnings
+
+    def _allows_latest_year_growth(self, value, prev_value):
+        if isinstance(value, dict) and isinstance(prev_value, dict):
+            keys = set(value).union(prev_value)
+            return all(
+                value.get(key, 0) >= prev_value.get(key, 0) for key in keys
+            )
+
+        if isinstance(value, (int, float)) and isinstance(prev_value, (int, float)):
+            return value >= prev_value
+
+        return False
 
     def _run_validation(self, yearly_info):
         errors = []
