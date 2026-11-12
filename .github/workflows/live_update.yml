@@ -7,7 +7,7 @@ on:
     inputs:
       update_branch:
         description: 'Branch to push db update to'
-        default: 'live-updates'
+        default: 'main'
         type: string
 
 jobs:
